@@ -62,6 +62,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   const root = document.getElementById('app');
   const survey = new SurveyComponent(root);
+  survey.fetchHistory();
   survey.mount();
   survey.fetchHistory();
 });
