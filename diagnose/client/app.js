@@ -59,8 +59,8 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  survey.fetchHistory();
   const survey = new SurveyComponent(root);
+  survey.fetchHistory();
   survey.mount();
   survey.fetchQuestion();
 });
