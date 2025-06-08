@@ -1,6 +1,6 @@
 # Diagnose Project
 
-This subproject contains a PHP server with a static JavaScript client. The server exposes an API endpoint at `/api/hello` and serves the client files from the `client` directory. The client demonstrates a small component framework with animations.
+This subproject contains a PHP server with a static JavaScript client. The server exposes an API endpoint at `/api/hello` and additional survey endpoints for the client. The client demonstrates a small component framework with animations and displays survey questions returned by the server.
 
 ## Running
 

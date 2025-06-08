@@ -1,38 +1,60 @@
 window.addEventListener('DOMContentLoaded', () => {
-  class HelloComponent extends Framework.Component {
+  class SurveyComponent extends Framework.Component {
     constructor(root) {
       super(root);
-      this.message = '';
+      this.question = null;
+      this.done = false;
     }
 
-    async load() {
+    async fetchQuestion() {
       try {
-        const res = await fetch('/api/hello');
+        const res = await fetch('/api/question');
         const data = await res.json();
-        this.message = data.message;
+        if (data.done) {
+          this.done = true;
+        } else {
+          this.question = data.question;
+        }
       } catch (err) {
-        this.message = 'Error: ' + err;
+        this.question = 'Error: ' + err;
       }
       this.refresh();
     }
 
+    async sendAnswer(value) {
+      await fetch('/api/answer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ value })
+      });
+      await this.fetchQuestion();
+    }
+
     template() {
-      return `<div class="hello">${this.message}</div>`;
+      if (this.done) {
+        return '<div class="thanks">Thank you!</div>';
+      }
+      if (!this.question) {
+        return '<div>Loading...</div>';
+      }
+      const buttons = Array.from({ length: 7 }, (_, i) =>
+        `<button data-value="${i + 1}">${i + 1}</button>`
+      ).join(" ");
+      return `<div class="question"><p>${this.question}</p><div class="scale">${buttons}</div></div>`;
     }
 
     afterRender() {
-      const el = this.root.querySelector('.hello');
-      if (el) {
-        Framework.animate(el, [
-          { opacity: 0, transform: 'translateY(-20px)' },
-          { opacity: 1, transform: 'translateY(0)' }
-        ], { duration: 500, fill: 'forwards', easing: 'ease-out' });
-      }
+      this.root.querySelectorAll('button[data-value]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const val = parseInt(btn.dataset.value, 10);
+          this.sendAnswer(val);
+        });
+      });
     }
   }
 
-  const root = document.getElementById('result');
-  const hello = new HelloComponent(root);
-  hello.mount();
-  hello.load();
+  const root = document.getElementById('survey');
+  const survey = new SurveyComponent(root);
+  survey.mount();
+  survey.fetchQuestion();
 });
