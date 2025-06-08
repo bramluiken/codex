@@ -1,11 +1,35 @@
 <?php
 session_start();
 
-$questions = [
-    'How satisfied are you with our service?',
-    'How likely are you to recommend us to a friend?',
-    'How would you rate the overall experience?'
+// Map of available surveys (default plus any others)
+$surveys = [
+    'default' => [
+        'How satisfied are you with our service?',
+        'How likely are you to recommend us to a friend?',
+        'How would you rate the overall experience?'
+    ],
+    // Example secondary survey that can be accessed via /survey/product
+    'product' => [
+        'How would you rate the product quality?',
+        'How was the packaging?',
+        'How easy was the purchase process?'
+    ],
 ];
+
+// Handle links like /survey/<id> to select a survey
+if (preg_match('#^/survey/([A-Za-z0-9_-]+)$#',
+    parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), $m)) {
+    $id = $m[1];
+    $_SESSION['surveyId'] = $id;
+    if (!isset($_SESSION['surveys'][$id])) {
+        $_SESSION['surveys'][$id] = ['index' => 0, 'answers' => []];
+    }
+    header('Location: /');
+    exit;
+}
+
+$surveyId = $_SESSION['surveyId'] ?? 'default';
+$questions = $surveys[$surveyId] ?? $surveys['default'];
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
@@ -17,7 +41,8 @@ if ($uri === '/api/hello') {
 
 if ($uri === '/api/history') {
     header('Content-Type: application/json');
-    $answers = $_SESSION['answers'] ?? [];
+    $sessionData = $_SESSION['surveys'][$surveyId] ?? ['index' => 0, 'answers' => []];
+    $answers = $sessionData['answers'];
     $history = [];
     foreach ($questions as $i => $q) {
         $history[] = [
@@ -28,14 +53,15 @@ if ($uri === '/api/history') {
     }
     echo json_encode([
         'history' => $history,
-        'nextIndex' => $_SESSION['index'] ?? 0,
+        'nextIndex' => $sessionData['index'] ?? 0,
     ]);
     return;
 }
 
 if ($uri === '/api/question') {
     header('Content-Type: application/json');
-    $index = $_SESSION['index'] ?? 0;
+    $sessionData = $_SESSION['surveys'][$surveyId] ?? ['index' => 0, 'answers' => []];
+    $index = $sessionData['index'] ?? 0;
     if ($index < count($questions)) {
         echo json_encode(['question' => $questions[$index], 'index' => $index]);
     } else {
@@ -55,9 +81,13 @@ if ($uri === '/api/answer') {
         echo json_encode(['error' => 'Invalid answer']);
         return;
     }
-    $_SESSION['answers'][$index] = $value;
-    if (!isset($_SESSION['index']) || $index >= $_SESSION['index']) {
-        $_SESSION['index'] = $index + 1;
+    if (!isset($_SESSION['surveys'][$surveyId])) {
+        $_SESSION['surveys'][$surveyId] = ['index' => 0, 'answers' => []];
+    }
+    $_SESSION['surveys'][$surveyId]['answers'][$index] = $value;
+    if (!isset($_SESSION['surveys'][$surveyId]['index']) ||
+        $index >= $_SESSION['surveys'][$surveyId]['index']) {
+        $_SESSION['surveys'][$surveyId]['index'] = $index + 1;
     }
     echo json_encode(['status' => 'ok']);
     return;
