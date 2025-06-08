@@ -15,6 +15,24 @@ if ($uri === '/api/hello') {
     return;
 }
 
+if ($uri === '/api/history') {
+    header('Content-Type: application/json');
+    $answers = $_SESSION['answers'] ?? [];
+    $history = [];
+    foreach ($questions as $i => $q) {
+        $history[] = [
+            'index' => $i,
+            'question' => $q,
+            'answer' => $answers[$i] ?? null,
+        ];
+    }
+    echo json_encode([
+        'history' => $history,
+        'nextIndex' => $_SESSION['index'] ?? 0,
+    ]);
+    return;
+}
+
 if ($uri === '/api/question') {
     header('Content-Type: application/json');
     $index = $_SESSION['index'] ?? 0;
@@ -29,15 +47,18 @@ if ($uri === '/api/question') {
 if ($uri === '/api/answer') {
     header('Content-Type: application/json');
     $input = json_decode(file_get_contents('php://input'), true);
+    $index = isset($input['index']) ? intval($input['index']) : null;
     $value = isset($input['value']) ? intval($input['value']) : null;
-    if ($value === null || $value < 1 || $value > 7) {
+    if ($index === null || $index < 0 || $index >= count($questions) ||
+        $value === null || $value < 1 || $value > 7) {
         http_response_code(400);
         echo json_encode(['error' => 'Invalid answer']);
         return;
     }
-    $index = $_SESSION['index'] ?? 0;
     $_SESSION['answers'][$index] = $value;
-    $_SESSION['index'] = $index + 1;
+    if (!isset($_SESSION['index']) || $index >= $_SESSION['index']) {
+        $_SESSION['index'] = $index + 1;
+    }
     echo json_encode(['status' => 'ok']);
     return;
 }
