@@ -44,12 +44,13 @@
         return '<div class="thanks">Thank you!</div>';
       }
       const visible = this.questions.slice(0, this.nextIndex + 1);
-      return visible.map(q => {
+      return visible.map((q) => {
         const buttons = Array.from({ length: 7 }, (_, i) => {
           const val = i + 1;
           const sel = q.answer === val ? 'selected' : '';
           return `<button class="${sel}" data-index="${q.index}" data-value="${val}">${val}</button>`;
         }).join(' ');
+
         return `<div class="question" data-question-index="${q.index}"><p>${q.question}</p><div class="scale">${buttons}</div></div>`;
       }).join('');
     }
