@@ -17,6 +17,9 @@ php -S localhost:8000 -t server server/index.php
 
 The questionnaire will request the next question automatically based on server state.
 
+To start a specific survey, open `/survey/<id>` in the browser (for example `/survey/product`).
+The server will remember the survey ID in your session and serve the same client UI at `/`.
+
 ```
 
 Then open [http://localhost:8000](http://localhost:8000) in your browser or run the `curl` command described in `AGENTS.md`.
