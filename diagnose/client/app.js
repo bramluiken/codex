@@ -1,4 +1,19 @@
-window.addEventListener('DOMContentLoaded', () => {
+(() => {
+  class SurveyService {
+    static async history() {
+      const res = await fetch('/api/history');
+      return res.json();
+    }
+
+    static async answer(index, value) {
+      return fetch('/api/answer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ index, value })
+      });
+    }
+  }
+
   class SurveyComponent extends Framework.Component {
     constructor(root) {
       super(root);
@@ -7,10 +22,9 @@ window.addEventListener('DOMContentLoaded', () => {
       this.done = false;
     }
 
-    async fetchHistory() {
+    async refreshData() {
       try {
-        const res = await fetch('/api/history');
-        const data = await res.json();
+        const data = await SurveyService.history();
         this.questions = data.history;
         this.nextIndex = data.nextIndex;
         this.done = this.nextIndex >= this.questions.length;
@@ -20,13 +34,9 @@ window.addEventListener('DOMContentLoaded', () => {
       this.refresh();
     }
 
-    async sendAnswer(index, value) {
-      await fetch('/api/answer', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ index, value })
-      });
-      await this.fetchHistory();
+    async handleAnswer(index, value) {
+      await SurveyService.answer(index, value);
+      await this.refreshData();
     }
 
     template() {
@@ -50,7 +60,7 @@ window.addEventListener('DOMContentLoaded', () => {
         btn.addEventListener('click', () => {
           const index = parseInt(btn.dataset.index, 10);
           const val = parseInt(btn.dataset.value, 10);
-          this.sendAnswer(index, val);
+          this.handleAnswer(index, val);
         });
       });
       const newEl = this.root.querySelector(`.question[data-question-index="${this.nextIndex}"]`);
@@ -60,9 +70,10 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  const root = document.getElementById('app');
-  const survey = new SurveyComponent(root);
-  survey.fetchHistory();
-  survey.mount();
-  survey.fetchHistory();
-});
+  window.addEventListener('DOMContentLoaded', () => {
+    const root = document.getElementById('app');
+    const survey = new SurveyComponent(root);
+    survey.mount();
+    survey.refreshData();
+  });
+})();
