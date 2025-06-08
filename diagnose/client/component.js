@@ -1,19 +1,4 @@
 (() => {
-  class SurveyService {
-    static async history() {
-      const res = await fetch('/api/history');
-      return res.json();
-    }
-
-    static async answer(index, value) {
-      return fetch('/api/answer', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ index, value })
-      });
-    }
-  }
-
   class SurveyComponent extends Framework.Component {
     constructor(root) {
       super(root);
@@ -70,10 +55,5 @@
     }
   }
 
-  window.addEventListener('DOMContentLoaded', () => {
-    const root = document.getElementById('app');
-    const survey = new SurveyComponent(root);
-    survey.mount();
-    survey.refreshData();
-  });
+  window.SurveyComponent = SurveyComponent;
 })();
