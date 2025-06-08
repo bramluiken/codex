@@ -8,6 +8,7 @@ From the `diagnose` directory, start the built-in PHP server (you may need to in
 
 ```bash
 php -S localhost:8000 -t server server/index.php
+
 ```
 
 Then open [http://localhost:8000](http://localhost:8000) in your browser or run the `curl` command described in `AGENTS.md`.
