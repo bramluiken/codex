@@ -8,7 +8,6 @@ From the `diagnose` directory, start the built-in PHP server (you may need to in
 
 ```bash
 php -S localhost:8000 -t server server/index.php
-```
 
 ### API Endpoints
 
@@ -17,5 +16,4 @@ php -S localhost:8000 -t server server/index.php
 - `POST /api/answer` – submit or update an answer (JSON: `{index, value}`).
 
 The questionnaire will request the next question automatically based on server state.
-
 Then open [http://localhost:8000](http://localhost:8000) in your browser or run the `curl` command described in `AGENTS.md`.
