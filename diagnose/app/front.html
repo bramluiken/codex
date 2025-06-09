@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Create Questionnaire</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 2em; }
+    #link a { font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>Create Questionnaire</h1>
+  <button id="create">Create Link</button>
+  <p id="link"></p>
+  <script>
+    const alphabet = '23456789CFGHJMPQRVWX';
+    document.getElementById('create').addEventListener('click', () => {
+      let id = Array.from({length:8}, () => alphabet[Math.floor(Math.random()*alphabet.length)]).join('');
+      const link = '/survey/' + id;
+      document.getElementById('link').innerHTML = `<a href="${link}">${location.origin}${link}</a>`;
+    });
+  </script>
+</body>
+</html>
