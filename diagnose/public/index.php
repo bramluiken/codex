@@ -32,6 +32,7 @@ if (isset($parts[0]) && $parts[0] === 'api' && count($parts) >= 2) {
         echo 'Invalid survey id';
         return;
     }
+
     $endpoint = $parts[2];
     switch ($endpoint) {
         case 'history':

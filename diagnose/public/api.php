@@ -6,7 +6,7 @@ function handleHello() {
 
 function handleHistory(PDO $pdo, string $surveyId, array $questions) {
     header('Content-Type: application/json');
-    echo 'debug';
+
     $stmt = $pdo->prepare('SELECT question_index, answer FROM answers WHERE survey_id = ?');
     $stmt->execute([$surveyId]);
     $answers = [];
