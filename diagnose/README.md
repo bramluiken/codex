@@ -2,6 +2,8 @@
 
 This subproject contains a PHP server with a static JavaScript client. The server exposes an API endpoint at `/api/hello` and survey endpoints for the client. The client uses a tiny component framework with animations and shows a questionnaire that grows as new questions arrive.
 
+See `docs/v2.0.md` for the latest 2.0 release notes.
+
 ## Running
 
 From the `diagnose` directory, start the built-in PHP server (you may need to install PHP with `sudo apt-get install php-cli php-mysql`):
