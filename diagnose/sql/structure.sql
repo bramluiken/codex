@@ -29,20 +29,3 @@ CREATE TABLE answers (
   PRIMARY KEY (survey_id, symptom_id),
   FOREIGN KEY (symptom_id) REFERENCES symptoms(id)
 );
-
--- Example seed data
-INSERT INTO symptoms (question) VALUES
-  ('How satisfied are you with our service?'),
-  ('How likely are you to recommend us to a friend?'),
-  ('How would you rate the overall experience?');
-
-INSERT INTO diagnoses (name) VALUES
-  ('Great'),
-  ('Neutral'),
-  ('Poor');
-
--- Simple weight matrix for demonstration purposes
-INSERT INTO weights (symptom_id, diagnosis_id, weight) VALUES
-  (1,1, 1.0), (1,2, 0.5), (1,3, -1.0),
-  (2,1, 1.0), (2,2, 0.2), (2,3, -0.5),
-  (3,1, 1.0), (3,2, 0.1), (3,3, -0.7);
