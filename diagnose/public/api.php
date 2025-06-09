@@ -7,25 +7,21 @@ function handleHello() {
 function handleHistory(PDO $pdo, string $surveyId, array $questions) {
     header('Content-Type: application/json');
 
-    $stmt = $pdo->prepare('SELECT symptom_id, answer FROM answers WHERE survey_id = ?');
+    $stmt = $pdo->prepare('SELECT symptom_id, answer FROM answers WHERE survey_id = ? ORDER BY created_at');
     $stmt->execute([$surveyId]);
-    $answers = [];
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $answers[$row['symptom_id']] = $row['answer'];
-    }
     $history = [];
-    foreach ($questions as $i => $q) {
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $sid = $row['symptom_id'];
+        if (!isset($questions[$sid])) {
+            continue;
+        }
         $history[] = [
-            'index' => $i,
-            'question' => $q,
-            'answer' => $answers[$i] ?? null,
+            'index' => $sid,
+            'question' => $questions[$sid],
+            'answer' => $row['answer'],
         ];
     }
-    $nextIndex = selectNextIndex($pdo, $surveyId);
-    echo json_encode([
-        'history' => $history,
-        'nextIndex' => $nextIndex,
-    ]);
+    echo json_encode(['history' => $history]);
 }
 
 function handleQuestion(PDO $pdo, string $surveyId, array $questions) {
@@ -49,7 +45,7 @@ function handleAnswer(PDO $pdo, string $surveyId, array $questions) {
         echo json_encode(['error' => 'Invalid answer']);
         return;
     }
-    $stmt = $pdo->prepare('INSERT INTO answers (survey_id, symptom_id, answer) VALUES (?,?,?) ON DUPLICATE KEY UPDATE answer=VALUES(answer)');
+    $stmt = $pdo->prepare('INSERT INTO answers (survey_id, symptom_id, answer, created_at) VALUES (?,?,?,NOW()) ON DUPLICATE KEY UPDATE answer=VALUES(answer)');
     $stmt->execute([$surveyId, $index, $value]);
     echo json_encode(['status' => 'ok']);
 }

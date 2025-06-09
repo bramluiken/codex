@@ -26,6 +26,7 @@ CREATE TABLE answers (
   survey_id VARCHAR(8) NOT NULL,
   symptom_id INT NOT NULL,
   answer INT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (survey_id, symptom_id),
   FOREIGN KEY (symptom_id) REFERENCES symptoms(id)
 );

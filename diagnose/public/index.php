@@ -7,12 +7,18 @@ if (file_exists($dbPath)) {
     require $dbPath;
 } else {
     // Fallback default connection
-    $pdo = new PDO(
-        'mysql:host=localhost;dbname=survey;charset=utf8mb4',
-        'root',
-        '',
-        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-    );
+    try {
+        $pdo = new PDO(
+            'mysql:host=localhost;dbname=survey;charset=utf8mb4',
+            'root',
+            '',
+            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+        );
+    } catch (PDOException $e) {
+        $pdo = new PDO('sqlite::memory:');
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $pdo->exec('CREATE TABLE IF NOT EXISTS symptoms (id INTEGER PRIMARY KEY, question TEXT)');
+    }
 }
 
 // Load symptoms from the database

@@ -9,6 +9,11 @@
       return res.json();
     }
 
+    static async question() {
+      const res = await fetch(`/api/${SurveyService.surveyId}/question`);
+      return res.json();
+    }
+
     static async answer(index, value) {
       return fetch(`/api/${SurveyService.surveyId}/answer`, {
         method: 'POST',
