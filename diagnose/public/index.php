@@ -1,5 +1,4 @@
 <?php
-$questions = require __DIR__ . '/questions.php';
 require __DIR__ . '/api.php';
 
 $pdo = null;
@@ -14,6 +13,13 @@ if (file_exists($dbPath)) {
         '',
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     );
+}
+
+// Load symptoms from the database
+$questions = [];
+$stmt = $pdo->query('SELECT id, question FROM symptoms ORDER BY id');
+while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+    $questions[$row['id']] = $row['question'];
 }
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
@@ -43,6 +49,9 @@ if (isset($parts[0]) && $parts[0] === 'api' && count($parts) >= 2) {
             break;
         case 'answer':
             handleAnswer($pdo, $surveyId, $questions);
+            break;
+        case 'scores':
+            handleScores($pdo, $surveyId);
             break;
         default:
             http_response_code(404);
