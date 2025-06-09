@@ -2,17 +2,18 @@
 $questions = require __DIR__ . '/questions.php';
 require __DIR__ . '/api.php';
 
-function get_pdo(): PDO {
-    static $pdo = null;
-    if ($pdo === null) {
-        $host = getenv('DB_HOST') ?: 'localhost';
-        $db   = getenv('DB_NAME') ?: 'survey';
-        $user = getenv('DB_USER') ?: 'root';
-        $pass = getenv('DB_PASS') ?: '';
-        $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    }
-    return $pdo;
+$pdo = null;
+$dbPath = __DIR__ . '/db.php';
+if (file_exists($dbPath)) {
+    require $dbPath;
+} else {
+    // Fallback default connection
+    $pdo = new PDO(
+        'mysql:host=localhost;dbname=survey;charset=utf8mb4',
+        'root',
+        '',
+        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+    );
 }
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
@@ -31,21 +32,16 @@ if (isset($parts[0]) && $parts[0] === 'api' && count($parts) >= 2) {
         echo 'Invalid survey id';
         return;
     }
-    $endpoint = $parts[2] ?? 'history';
+
+    $endpoint = $parts[2];
     switch ($endpoint) {
-        case 'hello':
-            handleHello();
-            break;
         case 'history':
-            $pdo = get_pdo();
             handleHistory($pdo, $surveyId, $questions);
             break;
         case 'question':
-            $pdo = get_pdo();
             handleQuestion($pdo, $surveyId, $questions);
             break;
         case 'answer':
-            $pdo = get_pdo();
             handleAnswer($pdo, $surveyId, $questions);
             break;
         default:
@@ -54,7 +50,26 @@ if (isset($parts[0]) && $parts[0] === 'api' && count($parts) >= 2) {
     return;
 }
 
+$mimeMap = [
+    'js' => 'application/javascript',
+    'css' => 'text/css',
+    'json' => 'application/json',
+    'woff' => 'font/woff',
+    'woff2' => 'font/woff2',
+    'ttf' => 'font/ttf',
+    'svg' => 'image/svg+xml',
+    'eot' => 'application/vnd.ms-fontobject',
+    'jpg' => 'image/jpeg',
+    'jpeg' => 'image/jpeg',
+    'png' => 'image/png',
+    'gif' => 'image/gif',
+    'webp' => 'image/webp',
+    'html' => 'text/html',
+    'js.map' => 'application/json',
+];
+
 $clientBase = realpath(__DIR__ . '/../app');
+
 if ($uri === '/') {
     $path = realpath($clientBase . '/front.html');
 } elseif (preg_match('#^/survey/[23456789CFGHJMPQRVWX]{8}$#i', $uri)) {
@@ -62,8 +77,10 @@ if ($uri === '/') {
 } else {
     $path = realpath($clientBase . $uri);
 }
+
 if ($path && strpos($path, $clientBase) === 0 && is_file($path)) {
-    $mime = mime_content_type($path);
+    $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+    $mime = $mimeMap[$ext] ?? mime_content_type($path);
     header('Content-Type: ' . $mime);
     readfile($path);
 } else {
