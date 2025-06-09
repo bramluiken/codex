@@ -31,10 +31,10 @@ export DB_USER=root
 export DB_PASS=
 ```
 
-Create the table with:
+Initialize the database with all tables and seed data using:
 
 ```bash
-mysql -u$DB_USER -p$DB_PASS $DB_NAME < sql/create_answers.sql
+mysql -u$DB_USER -p$DB_PASS $DB_NAME < sql/setup.sql
 ```
 
 Then open [http://localhost:8000](http://localhost:8000) in your browser or run the `curl` command described in `AGENTS.md`.
