@@ -8,9 +8,11 @@
 
     async refreshData() {
       try {
-        const hist = await SurveyService.history();
+        const [hist, next] = await Promise.all([
+          SurveyService.history(),
+          SurveyService.question(),
+        ]);
         this.questions = hist.history;
-        const next = await SurveyService.question();
         if (!next.done) {
           this.questions.push({ index: next.index, question: next.question, answer: null });
           this.done = false;
