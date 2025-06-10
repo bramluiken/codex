@@ -18,6 +18,23 @@ php -S localhost:8000 -t public public/index.php
 
 The questionnaire requests the next question automatically based on server state.
 
+## Efficiency-Aware Question Selection
+
+The API now chooses questions using a three-stage information-theoretic
+approach:
+
+1. **Stage 1 – Exploration**
+   - Picks the question with the highest expected entropy reduction across all
+     diagnoses.
+2. **Stage 2 – Differential Diagnosis**
+   - Focuses on the top three most probable diagnoses and again selects the
+     question with the highest expected gain among them.
+3. **Stage 3 – Confirmation**
+   - Prioritizes questions that best confirm or refute the leading diagnosis.
+
+The threshold for asking additional questions becomes stricter as more responses
+are recorded to keep surveys short when little new information is gained.
+
 Visit `/` to generate a new 8‑character questionnaire link. Opening `/survey/<id>` loads the questionnaire identified by `<id>`.
 
 ### Database
